@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Shopping</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff; /* Light blue background */
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: #1e90ff; /* DodgerBlue */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            color: white;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        label {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        input, select {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #1e90ff;
+            background-color: #ffffff;
+            color: #333;
+            font-size: 18px;
+            width: 100%;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #ff4500; /* OrangeRed */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ff6347; /* Tomato */
+        }
+
+        #results {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .item {
+            margin: 15px;
+            padding: 20px;
+            background-color: #fffacd; /* LemonChiffon */
+            border-radius: 15px;
+            width: calc(50% - 40px);
+            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            color: #333;
+        }
+
+        .item:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .item img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .item p {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>What Can You Buy?</h1>
+        <form id="budgetForm">
+            <label for="amount">Enter your budget:</label>
+            <input type="number" id="amount" placeholder="Enter amount" required>
+           
+            <label for="category">Select Category:</label>
+            <select id="category" onchange="updateSubcategories()">
+                <option value="food">Food</option>
+                <option value="electronics">Electronics</option>
+                <option value="clothes">Clothes</option>
+                <option value="footwear">Footwear</option>
+                <option value="jewelry">Jewelry</option>
+                <option value="medical">Medical</option>
+                <option value="household">Household Items</option>
+                <option value="stationery">Stationery</option>
+            </select>
+
+            <label for="subcategory">Select Subcategory:</label>
+            <select id="subcategory">
+                <!-- Subcategories will be dynamically populated -->
+            </select>
+
+            <button type="button" onclick="findItems()">Find Items</button>
+        </form>
+
+        <div id="results"></div>
+    </div>
+   
+    <script>
+        const subcategories = {
+            food: ["Fast Food", "Biryani", "Snacks","Beverages"],
+            electronics: ["Smartphones", "Home Appliances", "Accessories"],
+            clothes: ["Men’s Clothing", "Women’s Clothing", "Kids Clothing"],
+            footwear: ["Sneakers", "Sandals", "Boots"],
+            jewelry: ["Gold", "Silver", "Fashion Jewelry"],
+            medical: ["Personal Care", "First Aid", "Presciptions"],
+            household: ["Cleaning Supplies", "Kitchen Tools", "Decor"],
+            stationery: ["Writing", "Paper Products", "Office Supplies"]
+        };
+
+      const items = {
+    food: {
+        "Fast Food": [
+            { name: "Burger", price: 50, image: "https://assets.onecompiler.app/42pwnkk2a/42sqx5d3u/burger.jpg" },
+            { name: "Pizza", price: 150, image: "https://assets.onecompiler.app/42pwnkk2a/42sqxgkec/pizza.webp" },
+            { name: "Sandwich", price: 70, image: "https://assets.onecompiler.app/42pwnkk2a/42sqxgkec/sandwich.jpg" }
+        ],
+        "Snacks": [
+            { name: "Chips", price: 20, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/chips.jpg" },
+            { name: "Popcorn", price: 30, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/popc.jpeg" },
+            { name: "Samosa", price: 10, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/somosa.jpg" }
+        ],
+        "Biryani": [
+            { name: "Chicken Biryani", price: 220, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/cb.jpg" },
+            { name: "Veg Biryani", price: 150, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/vb.png" },
+            { name: "Mutton Biryani", price: 350, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/mb.jpg" }
+        ],
+        "Beverages": [
+            { name: "Coffee", price: 40, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/coffe.webp" },
+            { name: "Tea", price: 20, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/tea.avif" },
+            { name: "Soft Drinks", price: 30, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/sd.webp" }
+        ]
+    },
+    electronics: {
+        "Smartphones": [
+            { name: "realme ", price: 15000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/realme.png" },
+            { name: "redmi", price: 20000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/redmi.webp" },
+            { name: "iphone", price: 150000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/iphone.webp" },
+            { name: "vivo", price: 30000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/vivo.png" }
+        ],
+        "Accessories": [
+            { name: "Headphones", price: 500, image: "https://assets.onecompiler.app/42pwnkk2a/42sqxgkec/HEADPHONES.webp" },
+            { name: "USB Cable", price: 150, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/usb-cable.webp" },
+            { name: "Power Bank", price: 1000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/power%20b.webp" }
+        ],
+        "Home Appliances": [
+            { name: "Microwave", price: 8000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/micro.webp" },
+            { name: "Refrigerator", price: 20000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/refrigerator.jpg" },
+            { name: "Washing Machine", price: 15000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/wm.png" }
+        ]
+    },
+    clothes: {
+        "Men’s Clothing": [
+            { name: "T-shirts", price: 500, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/t%20shirt.png" },
+            { name: "Jeans", price: 1200, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/jenes.avif" },
+            { name: "Formal Shirts", price: 900, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/fsirth.jpg" }
+        ],
+        "Women’s Clothing": [
+            { name: "Dresses", price: 1500, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/dress.webp" },
+            { name: "Sarees", price: 2000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/saree.webp" },
+            { name: "Tops", price: 700, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/tops.jpg" }
+        ],
+        "Kids Clothing": [
+            { name: "T-shirts", price: 300, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/images.jpeg" },
+            { name: "Shorts", price: 400, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/shorth.jpg" },
+            { name: "Dresses", price: 500, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/kdress.webp" }
+        ]
+    },
+    footwear: {
+        "Sneakers": [
+            { name: "Sneakers", price: 1500, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/snekers.webp" }
+        ],
+        "Sandals": [
+            { name: "Sandals", price: 800, image: "https://assets.onecompiler.app/42pwnkk2a/42sqxgkec/sandals.jpg" }
+        ],
+        "Boots": [
+            { name: "Boots", price: 2500, image: "https://assets.onecompiler.app/42pwnkk2a/42sqxgkec/boots.jpg" }
+        ]
+    },
+    jewelry: {
+        "Gold": [
+            { name: "Rings", price: 10000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/goldring.webp" },
+            { name: "Necklaces", price: 30000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/gold%20chain.webp" },
+            { name: "Earrings", price: 15000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/earring.webp" }
+        ],
+        "Silver": [
+            { name: "Bracelets", price: 5000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/breaslet.jpg" },
+            { name: "Chains", price: 7000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/silver%20chain.jpg" },
+            { name: "Anklets", price: 3000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/enkelests.webp" }
+        ],
+        "Fashion Jewelry": [
+            { name: "Costume Rings", price: 500, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/Costume%20Ring.jpg" },
+            { name: "Pendant Sets", price: 800, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/Pendant%20Sets.jpg" },
+            { name: "Bangles", price: 1000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/thread-bangles.jpg" }
+        ]
+    },
+    medical: {
+        "First Aid": [
+            { name: "Bandages", price: 50, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/bandages.jpg" },
+            { name: "Antiseptic Cream", price: 100, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/anti.webp" },
+            { name: "Painkillers", price: 150, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/painkiller.jpeg" }
+        ],
+        "Personal Care": [
+            { name: "Sanitizer", price: 70, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/sanitizer.jpeg" },
+            { name: "Face Masks", price: 30, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/face.jpg" },
+            { name: "Vitamins", price: 200, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/vitam.webp" }
+        ],
+        "Prescriptions": [
+            { name: "Blood Pressure Meds", price: 500, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/bp%20miss.jpg" },
+            { name: "Insulin", price: 1000, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/insulin.jpg" },
+            { name: "Antibiotics", price: 200, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/antibiotics.webp" }
+        ]
+    },
+    household: {
+        "Cleaning Supplies": [
+            { name: "Detergent", price: 200, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/deter.jpg" },
+            { name: "Floor Cleaner", price: 150, image: "https://assets.onecompiler.app/42pwfm7e3/42tbs4frq/floor.webp" },
+            { name: "Sponges", price: 30, image: "https://m.media-amazon.com/images/I/81diqTAjKBL.jpg" }
+        ],
+        "Kitchen Tools": [
+            { name: "Knives", price: 300, image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRUyb2bWh7xF4jGUQeVOkKlIaaFuOeoewQqw&s" },
+            { name: "Chopping Boards", price: 200, image: "https://vestahomes.in/cdn/shop/files/PhotoRoom_20230724_201438.jpg?v=1712994338&width=1445" },
+            { name: "Utensils", price: 1000, image: "https://blog.tatanexarc.com/wp-content/uploads/2024/03/Steel-utensils-business-opportunities.jpg" }
+        ],
+        "Decor": [
+            { name: "Wall Art", price: 500, image: "https://metalkart.in/cdn/shop/products/eternal-vine-premium-wall-art-52-x-28-inches-132710_1280x.jpg?v=1663831977" },
+            { name: "Cushions", price: 300, image: "https://mysleepyhead.com/media/catalog/product/c/u/cushion_fillers_set_of_5_blue.jpg" },
+            { name: "Lamps", price: 700, image: "https://m.media-amazon.com/images/I/81OHWphgYCL._AC_UF1000,1000_QL80_.jpg" }
+        ]
+    },
+    stationery: {
+        "Writing": [
+            { name: "Pens", price: 10, image: "https://m.media-amazon.com/images/I/81JTAjg+pIL.jpg" },
+            { name: "Pencils", price: 5, image: "https://images.squarespace-cdn.com/content/v1/58b451af03596efb0e7d5f95/1610390716805-VH3962QG871UBB8ZQPQW/Depositphotos_154225910_xl-2015.jpeg" },
+            { name: "Markers", price: 15, image: "https://shop.crayola.com/dw/image/v2/AALB_PRD/on/demandware.static/-/Sites-crayola-storefront/default/dw1859db2e/images/58-7808-0-226_Ultra-Clean-Washable-Markers_BL_Classic_8ct_PDP-2_C2.png?sw=790&sh=790&sm=fit&sfrm=png" }
+        ],
+        "Paper Products": [
+            { name: "Sticky Notes", price: 50, image: "https://rukminim2.flixcart.com/image/850/1000/l1dwknk0/post-it/c/v/x/sticky-notes-3x3-self-stick-notes-bright-colors-sticky-notes-400-original-imagcyz8ffn9chax.jpeg?q=20&crop=false" },
+            { name: "Diaries", price: 200, image: "https://rukminim2.flixcart.com/image/850/1000/k0y6cnk0/diary-notebook/6/q/z/coi-brown-a5-business-diary-executive-c0953e-original-imafkhgbatbcjktz.jpeg?q=90&crop=false" }
+        ],
+        "Office Supplies": [
+            { name: "Staplers", price: 100, image: "https://m.media-amazon.com/images/I/71IGoS+8AgL._AC_UF1000,1000_QL80_.jpg" },
+            { name: "Folders", price: 50, image: "https://www.shutterstock.com/image-illustration/floder-transfer-files-concept-landing-260nw-2271860913.jpg" },
+            { name: "Paper Clips", price: 20, image: "https://rukminim2.flixcart.com/image/850/1000/xif0q/clip/z/d/h/gem-paper-clip-28mm-size-80-pcs-paper-clips-for-home-office-original-imaggtmrrgnctsrp.jpeg?q=20&crop=false" }
+        ]
+    }
+};
+
+
+
+        function updateSubcategories() {
+            const category = document.getElementById('category').value;
+            const subcategorySelect = document.getElementById('subcategory');
+
+            // Clear previous subcategories
+            subcategorySelect.innerHTML = '';
+
+            // Populate subcategories based on the selected category
+            subcategories[category].forEach(subcat => {
+                const option = document.createElement('option');
+                option.value = subcat;
+                option.textContent = subcat;
+                subcategorySelect.appendChild(option);
+            });
+        }
+
+        function findItems() {
+            const amount = document.getElementById('amount').value;
+            const category = document.getElementById('category').value;
+            const subcategory = document.getElementById('subcategory').value;
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (!amount || amount <= 0) {
+                alert("Please enter a valid amount.");
+                return;
+            }
+
+            const affordableItems = items[category][subcategory].filter(item => item.price <= amount);
+
+            if (affordableItems.length === 0) {
+                resultsDiv.innerHTML = '<p>No items available within this budget.</p>';
+                return;
+            }
+
+            affordableItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('item');
+
+                itemDiv.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <p>${item.name}</p>
+                    <p>Price: ?${item.price}</p>
+                `;
+                resultsDiv.appendChild(itemDiv);
+            });
+        }
+
+        // Initialize the subcategories dropdown for the first time
+        updateSubcategories();
+    </script>
+</body>
+</html>
+
+
+
+
